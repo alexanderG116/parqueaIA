@@ -1,119 +1,41 @@
-# UTEQ Smart Parking: vehículos y propietarios
+# UTEQ Smart Parking - Panel de Administración
 
-<img src="public/captura.png">
-Panel administrativo desarrollado con React, Vite y CoreUI para consultar y visualizar los vehículos autorizados del sistema UTEQ Smart Parking. La información se obtiene directamente desde Supabase.
+Sistema web desarrollado para la gestión vehicular y monitoreo de accesos en el parqueadero de la **Universidad Técnica Estatal de Quevedo (UTEQ)**. Este proyecto extiende el panel administrativo base integrando reconocimiento automático de placas vehiculares (ALPR/ANPR) en tiempo real mediante visión artificial y consulta de registros en Supabase.
 
-## Práctica realizada
+---
 
-Se implementó la vista administrativa **Vehículos y propietarios**, accesible desde el menú lateral en:
+## 📌 Módulo: Monitoreo de Entrada
 
-```text
-/parqueadero/vehiculos
-```
+Vista desarrollada para el control de accesos vehiculares institucional (`/parqueadero/monitoreo-entrada`).
 
-La pantalla incluye:
+![Monitoreo de Entrada - UTEQ Smart Parking](./demo.jpg)
 
-- Consulta de la tabla `vehiculos` de Supabase.
-- Fotografía del vehículo con enlace a la fuente original.
-- Fotografía circular del propietario.
-- Matrícula, marca, modelo, año y color.
-- Nombre del propietario, cédula enmascarada y correo institucional.
-- Estado de autorización del vehículo.
-- Búsqueda por placa, marca, modelo, color, propietario o correo.
-- Paginación de 10 registros por página.
-- Indicador de carga y mensaje de error.
-- Botón **Actualizar** para volver a consultar los datos.
+### Características principales:
+* **Captura en Vivo:** Integración con la Web API `navigator.mediaDevices.getUserMedia()` con selección automática de la cámara trasera (`environment`) en terminales móviles.
+* **Carga de Archivos:** Soporte alternativo para selección manual de fotografías en formatos `JPG` y `PNG` (máximo 4 MiB).
+* **Consumo de Servicio OCR:** Envío binario (`application/octet-stream` / `Blob`) hacia Azure REST API para detección de matrícula.
+* **Marcado Visual:** Visualización reactiva de la placa delimitada mediante un bounding box verde devuelto en Base64.
+* **Consulta Automatizada en Supabase:** Validación inmediata del vehículo en la base de datos institucional:
+  * **Vehículo Registrado:** Muestra datos técnicos, fotografía del vehículo, fotografía del propietario, cédula enmascarada y badge de autorización.
+  * **Vehículo No Registrado:** Alerta visual de bloqueo que impide el acceso vehicular.
+* **Manejo de Errores y Estados:** Control de casos límite como baja confianza, múltiples placas, ausencia de placa y códigos de estado HTTP (400, 413, 415, 502, 504).
 
-La práctica se limita a la consulta y visualización. No se implementaron formularios CRUD, sensores, reconocimiento de placas, registro de entradas o salidas, Firebase ni autenticación.
+---
 
-## Lista de vehículos agregados
+## 🛠️ Tecnologías Utilizadas
 
-La aplicación presenta los **38 vehículos** registrados en Supabase. La lista se carga dinámicamente y se ordena por nombre del propietario, por lo que no se mantiene una copia duplicada de los registros dentro del frontend.
+* **Frontend:** React 18 + Vite
+* **UI Toolkit:** CoreUI for React
+* **Estilos:** Bootstrap / SCSS
+* **OCR & Backend:** Azure Functions REST API
+* **Base de Datos:** Supabase (PostgreSQL)
+* **Despliegue & CI/CD:** Azure Static Web Apps + GitHub Actions
 
-Cada vehículo consultado contiene los siguientes datos públicos:
+---
 
-| Dato | Descripción |
-| --- | --- |
-| `placa` | Matrícula del vehículo |
-| `marca` | Marca del vehículo |
-| `modelo` | Modelo del vehículo |
-| `anio` | Año del vehículo |
-| `color` | Color del vehículo |
-| `tipo` | Tipo de vehículo |
-| `foto_url` | Fotografía del vehículo |
-| `foto_fuente_url` | Fuente de la fotografía |
-| `foto_propietario_url` | Fotografía del propietario obtenida del SGA de la UTEQ |
-| `cedula_enmascarada` | Cédula protegida para visualización |
-| `propietario_nombre` | Nombre del propietario |
-| `correo_institucional` | Correo institucional |
-| `autorizado` | Estado de autorización |
+## ⚙️ Configuración del Entorno Local
 
-La tabla muestra los 38 registros en cuatro páginas: 10 vehículos en las tres primeras páginas y 8 en la última, cuando no se aplica ningún filtro.
-
-## Tecnologías utilizadas
-
-- React 19
-- Vite
-- CoreUI React
-- Supabase JavaScript Client
-- Sass
-
-## Configuración
-
-Crear un archivo `.env.local` en la raíz del proyecto con las credenciales públicas del proyecto Supabase:
-
-```dotenv
-VITE_SUPABASE_URL=https://SU_PROYECTO.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_SU_CLAVE
-```
-
-No se deben publicar `.env.local`, claves secretas ni claves `service_role`.
-
-## Instalación y ejecución
-
-```powershell
-npm.cmd install
-npm.cmd start
-```
-
-Abrir en el navegador:
-
-```text
-http://localhost:5173/parqueadero/vehiculos
-```
-
-Para generar la compilación de producción:
-
-```powershell
-npm.cmd run build
-```
-
-## Estructura principal
-
-```text
-src/
-├── _nav.jsx                         # Opción lateral Parqueadero
-├── routes.js                        # Ruta /parqueadero/vehiculos
-├── hooks/
-│   └── useVehiculos.js              # Consulta y recarga de Supabase
-├── lib/
-│   └── supabase.js                  # Cliente de Supabase
-├── components/
-│   ├── AppSidebar.jsx               # Logo del panel
-│   └── ...
-└── views/
-	└── parqueadero/
-		└── ListaVehiculos.jsx       # Tabla, búsqueda y paginación
-```
-
-## Verificación de la práctica
-
-Con las variables de entorno configuradas y la tabla `vehiculos` disponible en Supabase, se debe comprobar que:
-
-1. Se carguen los 38 vehículos.
-2. Se visualicen las fotografías del vehículo y del propietario.
-3. La cédula aparezca enmascarada.
-4. La búsqueda filtre los campos indicados.
-5. La paginación muestre 10 registros por página.
-6. **Actualizar** vuelva a consultar Supabase.
-7. No existan opciones ni formularios para insertar, modificar o eliminar vehículos.
+1. **Clonar el repositorio:**
+   ```bash
+   git clone https://github.com/alexanderG116/SmartParkingUTEQ-PanelAdministracion.git
+   cd SmartParkingUTEQ-PanelAdministracion
